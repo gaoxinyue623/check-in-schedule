@@ -1,0 +1,28 @@
+{
+  "name": "check-in-schedule",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "capacitor:init": "npm install @capacitor/core @capacitor/cli @capacitor/ios @capacitor/android && npx cap init",
+    "capacitor:add:ios": "npm run build && npx cap add ios",
+    "capacitor:add:android": "npm run build && npx cap add android",
+    "capacitor:sync": "npm run build && npx cap sync",
+    "capacitor:open:ios": "npx cap open ios",
+    "capacitor:open:android": "npx cap open android",
+    "app:build:ios": "npm run build && npx cap sync && npx cap open ios",
+    "app:build:android": "npm run build && npx cap sync && npx cap open android"
+  },
+  "dependencies": {
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.2.8"
+  }
+}
