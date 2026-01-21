@@ -1,0 +1,35 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFE066;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD93D;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="star" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#FFF;stop-opacity:0.2" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle (Optional, for adaptive icons) -->
+  <circle cx="512" cy="512" r="512" fill="#FFB7D2"/>
+  
+  <!-- Cute Star Shape -->
+  <path d="M512 80 L630 380 L950 400 L700 600 L780 910 L512 750 L244 910 L324 600 L74 400 L394 380 Z" 
+        fill="url(#bg)" stroke="#FF99C2" stroke-width="20" stroke-linejoin="round"/>
+        
+  <!-- Cute Face -->
+  <!-- Eyes -->
+  <circle cx="430" cy="550" r="30" fill="#4A4A4A"/>
+  <circle cx="594" cy="550" r="30" fill="#4A4A4A"/>
+  
+  <!-- Blush -->
+  <circle cx="380" cy="580" r="25" fill="#FF99C2" opacity="0.6"/>
+  <circle cx="644" cy="580" r="25" fill="#FF99C2" opacity="0.6"/>
+  
+  <!-- Smile -->
+  <path d="M480 620 Q512 650 544 620" fill="none" stroke="#4A4A4A" stroke-width="10" stroke-linecap="round"/>
+  
+  <!-- Sparkles -->
+  <path d="M800 200 L820 180 M800 180 L820 200" stroke="#FFF" stroke-width="10"/>
+  <circle cx="850" cy="250" r="10" fill="#FFF"/>
+</svg>

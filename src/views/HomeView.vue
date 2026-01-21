@@ -354,168 +354,47 @@ const deleteTaskConfirm = async (task) => {
 
 
 
-// 下载打卡表
+// 下载打卡表（导出为PDF）- 单页简化版
 const downloadCheckList = () => {
   const currentDay = monthSchedule.value[currentDayIndex.value]
   if (!currentDay) return
   
-  // 创建HTML内容
-  const html = `
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第${currentDay.day}天打卡表 - ${currentDay.date}</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
-      padding: 20px;
-      background: #fff;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      border: 3px solid #FF6B9D;
-      border-radius: 15px;
-      padding: 30px;
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-      border-bottom: 2px solid #FF6B9D;
-      padding-bottom: 20px;
-    }
-    .header h1 {
-      color: #FF6B9D;
-      font-size: 32px;
-      margin-bottom: 10px;
-    }
-    .header .date {
-      font-size: 20px;
-      color: #666;
-      margin-bottom: 5px;
-    }
-    .header .day-info {
-      font-size: 18px;
-      color: #888;
-    }
-    .task-item {
-      margin-bottom: 25px;
-      padding: 15px;
-      border: 2px solid #f0f0f0;
-      border-radius: 10px;
-      page-break-inside: avoid;
-    }
-    .task-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .checkbox {
-      width: 30px;
-      height: 30px;
-      border: 3px solid #FF6B9D;
-      border-radius: 5px;
-      margin-right: 15px;
-      flex-shrink: 0;
-    }
-    .task-time {
-      font-size: 14px;
-      color: #999;
-      margin-right: 10px;
-    }
-    .task-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-      flex: 1;
-    }
-    .task-stars {
-      font-size: 20px;
-    }
-    .task-description {
-      margin-left: 45px;
-      font-size: 14px;
-      color: #666;
-      line-height: 1.8;
-      white-space: pre-line;
-      background: #f8f8f8;
-      padding: 10px;
-      border-radius: 5px;
-      border-left: 3px solid #FF6B9D;
-    }
-    .footer {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 2px solid #FF6B9D;
-      text-align: center;
-      color: #888;
-      font-size: 14px;
-    }
-    .stars-info {
-      margin-top: 10px;
-      font-size: 16px;
-      color: #FFD93D;
-    }
-    @media print {
-      body {
-        padding: 0;
-      }
-      .container {
-        border: none;
-        padding: 20px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🌈 寒假学习打卡表 🌈</h1>
-      <div class="date">第${currentDay.day}天 - ${currentDay.date} ${currentDay.dayName}</div>
-      <div class="day-info">坚持打卡，收获满满！</div>
-    </div>
-    
-    ${currentDay.tasks.map(task => `
-      <div class="task-item">
-        <div class="task-header">
-          <div class="checkbox"></div>
-          <span class="task-time">${task.time}</span>
-          <span class="task-title">${task.activity}</span>
-          ${task.stars ? `<span class="task-stars">${'⭐'.repeat(task.stars)}</span>` : ''}
-        </div>
-        ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
-      </div>
-    `).join('')}
-    
-    <div class="footer">
-      <div>完成任务后，请在方框内打✓</div>
-      <div class="stars-info">今日可获得星星：${currentDay.tasks.filter(t => t.stars).reduce((sum, t) => sum + t.stars, 0)} ⭐</div>
-      <div style="margin-top: 15px;">加油！你是最棒的！💪</div>
-    </div>
-  </div>
-</body>
-</html>
-  `
+  const totalStars = currentDay.tasks.filter(t => t.stars).reduce((sum, t) => sum + t.stars, 0)
+  const completedTasks = currentDay.tasks.filter(t => t.completed).length
   
-  // 创建Blob并下载
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `第${currentDay.day}天打卡表_${currentDay.date}.html`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  /* eslint-disable */
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>第${currentDay.day}天打卡表</title>
+<style>@page{size:A4;margin:8mm}*{margin:0;padding:0;box-sizing:border-box}body{font-family:"Microsoft YaHei",Arial,sans-serif;font-size:9pt;padding:6mm;line-height:1.3}.header{text-align:center;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #FF6B9D}.header h1{color:#FF6B9D;font-size:14pt;margin-bottom:3px}.header .info{font-size:9pt;color:#666}.task{display:flex;align-items:flex-start;margin:10px 0;padding:4px 6px;border:1px solid #e0e0e0;border-radius:3px;page-break-inside:avoid}.checkbox{width:14px;height:14px;border:1.5px solid #FF6B9D;border-radius:2px;margin:1px 6px 0 0;flex-shrink:0}.content{flex:1;display:flex;align-items:baseline;gap:4px}.time{font-size:8pt;color:#999;min-width:60px}.title{font-weight:600;font-size:9pt;flex:1}.stars{color:#FFD93D;font-size:8pt;white-space:nowrap}.footer{margin-top:8px;padding-top:6px;border-top:1px solid #ddd;text-align:center;font-size:8pt;color:#888;display:flex;justify-content:space-around}.summary{color:#FFD93D;font-weight:600}</style>
+</head><body onload="setTimeout(()=>window.print(),300)">
+<div class="header"><h1>🌈 寒假学习打卡表<\/h1><div class="info">第${currentDay.day}天 · ${currentDay.date} ${currentDay.dayName} · 已完成 ${completedTasks}/${currentDay.tasks.length}<\/div><\/div>
+${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.completed ? '✓' : ''}<\/div><div class="content"><span class="time">${t.time}<\/span><span class="title">${t.activity}${t.description ? ' - ' + t.description : ''}<\/span>${t.stars ? `<span class="stars">${'⭐'.repeat(t.stars)}<\/span>` : ''}<\/div><\/div>`).join('')}
+<div class="footer"><span>完成任务后打✓<\/span><span class="summary">今日可获得 ${totalStars} ⭐<\/span><span>加油！💪<\/span><\/div>
+<\/body><\/html>`
+  /* eslint-enable */
   
-  showToast('success', '打卡表已下载！', '打开下载的HTML文件，可以直接打印或保存为PDF哦！', 4000)
+  try {
+    // 创建Blob并下载（适用于移动端和桌面端）
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `打卡表_第${currentDay.day}天_${currentDay.date}.html`
+    link.style.display = 'none'
+    document.body.appendChild(link)
+    link.click()
+    
+    // 清理
+    setTimeout(() => {
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    }, 100)
+    
+    showToast('success', '打卡表已下载', '打开文件后可打印或保存为PDF', 3000)
+  } catch (error) {
+    console.error('下载失败:', error)
+    showToast('error', '下载失败', '请稍后重试', 3000)
+  }
 }
 
 </script>

@@ -1,0 +1,28 @@
+<svg width="1242" height="2208" viewBox="0 0 1242 2208" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF5F7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFE6F0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+  
+  <!-- Centered Cute Star -->
+  <g transform="translate(621, 1104) scale(1.5)">
+    <!-- Star Shape -->
+    <path d="M0 -300 L95 -75 L330 -60 L145 90 L205 320 L0 200 L-205 320 L-145 90 L-330 -60 L-95 -75 Z" 
+          fill="#FFD93D" stroke="#FF99C2" stroke-width="15" stroke-linejoin="round"/>
+          
+    <!-- Face -->
+    <circle cx="-60" cy="50" r="20" fill="#4A4A4A"/>
+    <circle cx="60" cy="50" r="20" fill="#4A4A4A"/>
+    <circle cx="-100" cy="70" r="18" fill="#FF99C2" opacity="0.6"/>
+    <circle cx="100" cy="70" r="18" fill="#FF99C2" opacity="0.6"/>
+    <path d="M-25 80 Q0 100 25 80" fill="none" stroke="#4A4A4A" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="621" y="1600" text-anchor="middle" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#FF6B9D">我的寒假计划</text>
+  <text x="621" y="1700" text-anchor="middle" font-family="Arial, sans-serif" font-size="40" fill="#888">快乐成长每一天</text>
+</svg>

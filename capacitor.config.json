@@ -1,6 +1,6 @@
 {
   "appId": "com.schedule.summer",
-  "appName": "我的暑假计划表",
+  "appName": "我的寒假计划",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"
