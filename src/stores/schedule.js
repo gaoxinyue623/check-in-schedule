@@ -318,6 +318,40 @@ export const useScheduleStore = defineStore('schedule', () => {
     return false
   }
 
+  // 添加礼品
+  const addGift = (giftData) => {
+    const newId = Math.max(...gifts.value.map(g => g.id), 0) + 1
+    gifts.value.push({
+      id: newId,
+      ...giftData,
+      redeemed: 0
+    })
+    saveToLocalStorage()
+    return newId
+  }
+
+  // 更新礼品
+  const updateGift = (giftId, updates) => {
+    const gift = gifts.value.find(g => g.id === giftId)
+    if (gift) {
+      Object.assign(gift, updates)
+      saveToLocalStorage()
+      return true
+    }
+    return false
+  }
+
+  // 删除礼品
+  const deleteGift = (giftId) => {
+    const giftIndex = gifts.value.findIndex(g => g.id === giftId)
+    if (giftIndex !== -1) {
+      gifts.value.splice(giftIndex, 1)
+      saveToLocalStorage()
+      return true
+    }
+    return false
+  }
+
   // 获取当前天的完成进度
   const getCurrentDayProgress = computed(() => {
     const day = monthSchedule.value[currentDayIndex.value]
@@ -387,6 +421,9 @@ export const useScheduleStore = defineStore('schedule', () => {
     addTask,
     deleteTask,
     redeemGift,
+    addGift,
+    updateGift,
+    deleteGift,
     getCurrentDayProgress,
     getCurrentDayStars,
     getMonthStars,

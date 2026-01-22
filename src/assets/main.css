@@ -7,23 +7,23 @@
   --warning-color: #FFD93D;
   --danger-color: #FF6B6B;
   --info-color: #6BCF7F;
-  
+
   /* 背景颜色 */
   --bg-primary: #FFF5F7;
   --bg-secondary: #FFF9E6;
   --bg-card: #FFFFFF;
-  
+
   /* 文字颜色 */
   --text-primary: #333333;
   --text-secondary: #666666;
   --text-light: #999999;
-  
+
   /* 边框和阴影 */
   --border-radius: 16px;
   --border-radius-sm: 8px;
   --box-shadow: 0 4px 12px rgba(255, 107, 157, 0.15);
   --box-shadow-lg: 0 8px 24px rgba(255, 107, 157, 0.2);
-  
+
   /* 间距 */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -104,7 +104,9 @@ body {
 }
 
 /* 标题样式 */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   color: var(--primary-color);
   margin-bottom: var(--spacing-md);
 }
@@ -131,30 +133,40 @@ h3 {
 
 /* 动画 */
 @keyframes bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
 }
 
 @keyframes shake {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(0);
   }
+
   25% {
     transform: translateX(-5px);
   }
+
   75% {
     transform: translateX(5px);
   }
@@ -171,7 +183,7 @@ h3 {
 /* 星星样式 */
 .star {
   color: var(--warning-color);
-  font-size: 24px;
+  font-size: 16px;
   display: inline-block;
   transition: all 0.3s ease;
 }
@@ -193,15 +205,15 @@ h3 {
   #app {
     padding: var(--spacing-md);
   }
-  
+
   h1 {
     font-size: 24px;
   }
-  
+
   h2 {
     font-size: 20px;
   }
-  
+
   .card {
     padding: var(--spacing-md);
   }

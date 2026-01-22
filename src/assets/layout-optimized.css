@@ -127,7 +127,7 @@
 .card {
     background: white;
     border-radius: 12px;
-    padding: 20px;
+    padding: 15px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
@@ -141,7 +141,7 @@
 .tasks-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: baseline;
     margin-bottom: 16px;
 }
 

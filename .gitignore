@@ -39,3 +39,4 @@ test-results/
 playwright-report/
 
 android
+.shared

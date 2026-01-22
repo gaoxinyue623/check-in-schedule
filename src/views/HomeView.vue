@@ -3,12 +3,31 @@
     <!-- 头部 -->
     <header class="header">
       <h2>🌈 寒假学习计划（1.24-2.20）🌈</h2>
-      <div class="star-counter pulse">
-        <span class="star-icon">⭐</span>
-        <span class="star-count">{{ totalStars }}</span>
-        <span class="star-label">颗星星</span>
+      <div class="header-stats">
+        <div class="star-counter pulse">
+          <span class="star-icon">⭐</span>
+          <span class="star-count">{{ totalStars }}</span>
+          <span class="star-label">颗星星</span>
+        </div>
       </div>
     </header>
+
+
+    <!-- 整体进度统计 -->
+    <div class="overall-stats card">
+      <div class="stats-row">
+        <div class="stat-item">
+          <span class="stat-value">{{ completedDaysCount }}/28</span>
+          <span class="stat-label">天</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-icon">🎯</span>
+          <span class="stat-value">{{ overallProgress }}%</span>
+          <span class="stat-label">完成率</span>
+        </div>
+      </div>
+    </div>
 
     <!-- 日期导航 -->
     <div class="month-nav card">
@@ -16,15 +35,19 @@
         v-for="(day, index) in monthSchedule"
         :key="index"
         class="day-btn"
-        :class="{ active: currentDayIndex === index }"
+        :class="{ 
+          active: currentDayIndex === index,
+          today: isTodayIndex(index),
+          completed: isDayCompleted(index)
+        }"
         @click="selectDay(index)"
       >
         <div class="day-number">第{{ day.day }}天</div>
-        <div class="day-name">{{ day.dayName }}</div>
-        <div class="day-date">{{ day.date }}</div>
-        <div class="day-stars">
-          <span v-if="getDayStars(index) > 0">⭐{{ getDayStars(index) }}</span>
+        <div>
+          <span class="day-name">{{ day.date }}</span>
+          <span class="day-date">({{ day.dayName }})</span>
         </div>
+        <div v-if="isDayCompleted(index)" class="completed-badge">✓</div>
       </button>
     </div>
 
@@ -32,7 +55,7 @@
     <div class="progress-card card">
       <h2>📊 今日进度</h2>
       <div class="progress-bar-container">
-        <div class="progress-bar" :style="{ width: getCurrentDayProgress + '%' }">
+        <div class="progress-bar" :style="{ width: getCurrentDayProgress.value + '%' }">
           <span class="progress-text">{{ getCurrentDayProgress }}%</span>
         </div>
       </div>
@@ -41,32 +64,30 @@
       </div>
     </div>
 
+    <!-- 庆祝动画 -->
+    <transition name="celebration">
+      <div v-if="showCelebration" class="celebration-overlay" @click="showCelebration = false">
+        <div class="celebration-content">
+          <div class="celebration-emoji">🎉</div>
+          <div class="celebration-text">太棒了！</div>
+          <div class="celebration-stars">{{ celebrationStars }}</div>
+        </div>
+      </div>
+    </transition>
+
     <!-- 任务列表 -->
     <div class="tasks-card card">
       <div class="tasks-header">
         <h2>📝 今日任务</h2>
         <div class="header-buttons">
           <button class="btn btn-success btn-sm" @click="downloadCheckList" title="下载打卡表">
-            📥 下载打卡表
+            📥 下载
           </button>
           <button class="btn btn-primary btn-sm" @click="showAddTaskModal = true">
             ➕ 添加任务
           </button>
         </div>
       </div>
-      
-      <div class="task-categories">
-        <button
-          v-for="cat in categories"
-          :key="cat.value"
-          class="category-btn"
-          :class="{ active: selectedCategory === cat.value }"
-          @click="selectedCategory = cat.value"
-        >
-          {{ cat.icon }} {{ cat.label }}
-        </button>
-      </div>
-
       <div class="tasks-list">
         <div
           v-for="task in filteredTasks"
@@ -79,7 +100,7 @@
               type="checkbox"
               :id="'task-' + task.id"
               :checked="task.completed"
-              @change="toggleTask(currentDayIndex, task.id)"
+              @click="handleTaskClick($event, currentDayIndex, task.id)"
               class="checkbox"
             />
           </div>
@@ -194,8 +215,12 @@ import ConfirmModal from '../components/ConfirmModal.vue'
 
 const router = useRouter()
 const store = useScheduleStore()
-const { monthSchedule, currentDayIndex, totalStars } = storeToRefs(store)
-const { toggleTask, updateTask, addTask, deleteTask, getCurrentDayProgress, getCurrentDayStars } = store
+const { monthSchedule, currentDayIndex, totalStars, getCurrentDayProgress, getCurrentDayStars } = storeToRefs(store)
+const { toggleTask: storeToggleTask, updateTask, addTask, deleteTask } = store
+
+// 庆祝动画状态
+const showCelebration = ref(false)
+const celebrationStars = ref('')
 
 // Toast提示状态
 const toast = ref({
@@ -244,6 +269,100 @@ const showConfirm = (title, message, onConfirm, type = 'confirm') => {
       }
     }
   })
+}
+
+// 整体统计
+const completedDaysCount = computed(() => {
+  return monthSchedule.value.filter(day => {
+    const tasksWithStars = day.tasks.filter(t => t.stars)
+    if (tasksWithStars.length === 0) return false
+    return tasksWithStars.every(t => t.completed)
+  }).length
+})
+
+const totalCompletedTasks = computed(() => {
+  return monthSchedule.value.reduce((total, day) => {
+    return total + day.tasks.filter(t => t.completed && t.stars).length
+  }, 0)
+})
+
+const overallProgress = computed(() => {
+  const totalTasksWithStars = monthSchedule.value.reduce((total, day) => {
+    return total + day.tasks.filter(t => t.stars).length
+  }, 0)
+  
+  if (totalTasksWithStars === 0) return 0
+  return Math.round((totalCompletedTasks.value / totalTasksWithStars) * 100)
+})
+
+// 判断是否是今天
+const isTodayIndex = (index) => {
+  const day = monthSchedule.value[index]
+  if (!day) return false
+  
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+  return day.fullDate === todayStr
+}
+
+// 判断某天是否完成
+const isDayCompleted = (index) => {
+  const day = monthSchedule.value[index]
+  if (!day) return false
+  
+  const tasksWithStars = day.tasks.filter(t => t.stars)
+  if (tasksWithStars.length === 0) return false
+  
+  return tasksWithStars.every(t => t.completed)
+}
+
+// 快速跳转到今天
+const jumpToToday = () => {
+  const todayIndex = monthSchedule.value.findIndex((day, index) => isTodayIndex(index))
+  if (todayIndex !== -1) {
+    currentDayIndex.value = todayIndex
+    selectedCategory.value = 'all'
+    showToast('success', '已跳转', '已跳转到今天的计划', 2000)
+  } else {
+    showToast('info', '提示', '今天不在计划范围内', 2000)
+  }
+}
+
+// 处理任务点击
+const handleTaskClick = (event, dayIndex, taskId) => {
+  // 检查是否是今天
+  if (!isTodayIndex(dayIndex)) {
+    event.preventDefault() // 阻止复选框状态改变
+    showToast('info', '温馨提示', '只能勾选今天的任务哦！可以查看其他日期的任务，但只有今天的任务可以打卡完成 😊', 3000)
+    return
+  }
+  
+  // 如果是今天，执行正常的切换逻辑
+  toggleTask(dayIndex, taskId)
+}
+
+// 增强的toggleTask，添加庆祝动画和非当日提示
+const toggleTask = (dayIndex, taskId) => {
+  // 检查是否是今天
+  if (!isTodayIndex(dayIndex)) {
+    showToast('info', '温馨提示', '只能勾选今天的任务哦！可以查看其他日期的任务，但只有今天的任务可以打卡完成 😊', 3000)
+    return
+  }
+
+  const day = monthSchedule.value[dayIndex]
+  const task = day.tasks.find(t => t.id === taskId)
+  
+  if (task && !task.completed && task.stars) {
+    // 任务从未完成变为完成，显示庆祝动画
+    celebrationStars.value = '⭐'.repeat(task.stars)
+    showCelebration.value = true
+    
+    setTimeout(() => {
+      showCelebration.value = false
+    }, 2000)
+  }
+  
+  storeToggleTask(dayIndex, taskId)
 }
 
 // 初始化
@@ -403,14 +522,22 @@ ${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.complet
 
 <style scoped>
 .schedule-page {
-  padding-bottom: 40px;
+  padding-bottom: 20px;
 }
 
 /* 头部 */
 .header {
   text-align: center;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 8px;
   position: relative;
+}
+
+.header-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .star-counter {
@@ -418,17 +545,17 @@ ${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.complet
   align-items: center;
   gap: 8px;
   background: linear-gradient(135deg, var(--warning-color) 0%, #FFE066 100%);
-  padding: 8px 16px;
+  padding: 2px 8px;
   border-radius: 50px;
   box-shadow: var(--box-shadow);
 }
 
 .star-icon {
-  font-size: 28px;
+  font-size: 20px;
 }
 
 .star-count {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -438,12 +565,145 @@ ${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.complet
   color: var(--text-secondary);
 }
 
+.quick-today-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.quick-today-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.quick-today-btn:active {
+  transform: translateY(0);
+}
+
+/* 整体进度统计 */
+.overall-stats {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  margin-bottom: 8px;
+  padding: 8px var(--spacing-md);
+}
+
+.overall-stats h3 {
+  text-align: center;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: var(--spacing-sm);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+
+.stat-icon {
+  font-size: 20px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.stat-divider {
+  width: 1px;
+  height: 30px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* 庆祝动画 */
+.celebration-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: pointer;
+}
+
+.celebration-content {
+  text-align: center;
+  animation: celebrationBounce 0.6s ease-out;
+}
+
+.celebration-emoji {
+  font-size: 120px;
+  animation: celebrationRotate 0.8s ease-in-out;
+}
+
+.celebration-text {
+  font-size: 36px;
+  font-weight: 700;
+  color: white;
+  margin: 20px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.celebration-stars {
+  font-size: 48px;
+  animation: celebrationPulse 1s ease-in-out infinite;
+}
+
+@keyframes celebrationBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes celebrationRotate {
+  0% { transform: rotate(0deg) scale(0); }
+  50% { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes celebrationPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+.celebration-enter-active, .celebration-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.celebration-enter-from, .celebration-leave-to {
+  opacity: 0;
+}
+
 /* 月份导航（28天） */
 .month-nav {
   display: flex;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
-  padding: var(--spacing-md);
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 10px;
   overflow-x: auto;
   scroll-behavior: smooth;
 }
@@ -466,7 +726,6 @@ ${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.complet
   background: white;
   border: 2px solid transparent;
   border-radius: var(--border-radius-sm);
-  padding: var(--spacing-sm);
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
@@ -483,6 +742,33 @@ ${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.complet
   background: linear-gradient(135deg, var(--primary-color) 0%, #FF8FB1 100%);
   color: white;
   border-color: var(--primary-color);
+}
+
+.day-btn.today {
+  border-color: #667eea;
+  border-width: 3px;
+  box-shadow: 0 0 12px rgba(102, 126, 234, 0.3);
+}
+
+.day-btn.completed {
+  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+  position: relative;
+}
+
+.completed-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--success-color);
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .day-number {
@@ -516,20 +802,20 @@ ${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.complet
 
 /* 进度卡片 */
 .progress-card {
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 8px;
 }
 
 .progress-bar-container {
   background: #f0f0f0;
   border-radius: 50px;
-  height: 40px;
+  height: 20px;
   overflow: hidden;
   margin: var(--spacing-md) 0;
   position: relative;
 }
 
 .progress-bar {
-  background: linear-gradient(135deg, var(--success-color) 0%, #B4E7D8 100%);
+  background: linear-gradient(135deg, var(--success-color) 0%, #34df64 100%);
   height: 100%;
   border-radius: 50px;
   transition: width 0.5s ease;
@@ -542,24 +828,24 @@ ${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.complet
 .progress-text {
   color: white;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .progress-info {
   text-align: center;
-  font-size: 18px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
 /* 任务卡片 */
 .tasks-card {
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: 8px;
 }
 
 .tasks-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
   margin-bottom: var(--spacing-md);
 }
 
@@ -603,15 +889,15 @@ ${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.complet
 .tasks-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 8px;
 }
 
 .task-item {
   display: flex;
   position: relative; /* Actions positioning */
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
+  gap: 12px;
+  padding: 12px;
   background: white;
   border: 2px solid #f0f0f0;
   border-radius: var(--border-radius-sm);
@@ -634,6 +920,11 @@ ${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.complet
 
 .task-checkbox {
   flex-shrink: 0;
+}
+
+.checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .task-content {
@@ -666,7 +957,7 @@ ${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.complet
 
 .task-reward {
   position: absolute;
-  top: 0;
+  top: 6px;
   right: 64px; /* Left of actions */
   flex-shrink: 0;
 }
@@ -826,6 +1117,52 @@ ${currentDay.tasks.map(t => `<div class="task"><div class="checkbox">${t.complet
   
   .gifts-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .stats-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .stat-item {
+    gap: 4px;
+  }
+  
+  .stat-icon {
+    font-size: 16px;
+  }
+  
+  .stat-value {
+    font-size: 16px;
+  }
+  
+  .stat-label {
+    font-size: 11px;
+  }
+  
+  .stat-divider {
+    display: none;
+  }
+  
+  .celebration-emoji {
+    font-size: 80px;
+  }
+  
+  .celebration-text {
+    font-size: 28px;
+  }
+  
+  .celebration-stars {
+    font-size: 36px;
+  }
+  
+  .quick-today-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  .header-stats {
+    gap: 12px;
   }
   
   /* Task item adjustments for mobile if needed, but absolute positioning handles actions */
