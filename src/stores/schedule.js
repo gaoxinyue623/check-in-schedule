@@ -597,6 +597,8 @@ export const useScheduleStore = defineStore('schedule', () => {
   // 初始化28天的计划（从1月26日开始）
   const initMonthSchedule = () => {
     const startDate = new Date(2026, 0, 26) // 2026年1月26日
+    const scheduleVersion = '2026-01-26' // 版本号，基于开始日期
+
     monthSchedule.value = []
 
     for (let i = 0; i < 28; i++) {
@@ -610,12 +612,21 @@ export const useScheduleStore = defineStore('schedule', () => {
         day: i + 1,
         dayName,
         date: `${currentDate.getMonth() + 1}月${currentDate.getDate()}日`,
-        fullDate: currentDate.toISOString().split('T')[0],
+        fullDate: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`,
         tasks: generateDayTasks(i + 1)
       })
     }
 
-    loadFromLocalStorage()
+    // 检查版本，如果版本不匹配则不加载旧数据
+    const savedVersion = localStorage.getItem('scheduleVersion')
+    if (savedVersion === scheduleVersion) {
+      loadFromLocalStorage()
+    } else {
+      // 版本不匹配，清除旧数据并保存新版本
+      console.log('检测到计划版本更新，重置数据')
+      localStorage.setItem('scheduleVersion', scheduleVersion)
+      saveToLocalStorage()
+    }
   }
 
   // 切换任务完成状态

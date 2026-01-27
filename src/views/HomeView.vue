@@ -2,7 +2,7 @@
   <div class="schedule-page">
     <!-- 头部 -->
     <header class="header">
-      <h2>🌈 寒假学习计划（1.24-2.20）🌈</h2>
+      <h2>🌈 寒假学习计划（1.26-2.22）🌈</h2>
       <div class="header-stats">
         <div class="star-counter pulse">
           <span class="star-icon">⭐</span>
@@ -316,26 +316,14 @@ const isDayCompleted = (index) => {
   return tasksWithStars.every(t => t.completed)
 }
 
-// 快速跳转到今天
-const jumpToToday = () => {
-  const todayIndex = monthSchedule.value.findIndex((day, index) => isTodayIndex(index))
-  if (todayIndex !== -1) {
-    currentDayIndex.value = todayIndex
-    selectedCategory.value = 'all'
-    showToast('success', '已跳转', '已跳转到今天的计划', 2000)
-  } else {
-    showToast('info', '提示', '今天不在计划范围内', 2000)
-  }
-}
-
 // 处理任务点击
 const handleTaskClick = (event, dayIndex, taskId) => {
   // 检查是否是今天
-  if (!isTodayIndex(dayIndex)) {
-    event.preventDefault() // 阻止复选框状态改变
-    showToast('info', '温馨提示', '只能勾选今天的任务哦！可以查看其他日期的任务，但只有今天的任务可以打卡完成 😊', 3000)
-    return
-  }
+  // if (!isTodayIndex(dayIndex)) {
+  //   event.preventDefault() // 阻止复选框状态改变
+  //   showToast('info', '温馨提示', '只能勾选今天的任务哦！可以查看其他日期的任务，但只有今天的任务可以打卡完成 😊', 3000)
+  //   return
+  // }
   
   // 如果是今天，执行正常的切换逻辑
   toggleTask(dayIndex, taskId)
@@ -344,10 +332,10 @@ const handleTaskClick = (event, dayIndex, taskId) => {
 // 增强的toggleTask，添加庆祝动画和非当日提示
 const toggleTask = (dayIndex, taskId) => {
   // 检查是否是今天
-  if (!isTodayIndex(dayIndex)) {
-    showToast('info', '温馨提示', '只能勾选今天的任务哦！可以查看其他日期的任务，但只有今天的任务可以打卡完成 😊', 3000)
-    return
-  }
+  // if (!isTodayIndex(dayIndex)) {
+  //   showToast('info', '温馨提示', '只能勾选今天的任务哦！可以查看其他日期的任务，但只有今天的任务可以打卡完成 😊', 3000)
+  //   return
+  // }
 
   const day = monthSchedule.value[dayIndex]
   const task = day.tasks.find(t => t.id === taskId)
